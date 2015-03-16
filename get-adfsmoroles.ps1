@@ -1,4 +1,5 @@
 ﻿function Get-FSMORoles {
+#get list of forest fsmo servers
     $domain = Get-ADDomain
     $forest = Get-ADForest
     $fsmo = @{InfrastructureMaster = $domain.InfrastructureMaster 
