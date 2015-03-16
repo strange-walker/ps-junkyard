@@ -10,3 +10,8 @@
               }
     $fsmo
 }
+
+#herecy grows here
+
+$fsmo = Get-ADDomain | select RIDMaster, InfrastructureMaster, PDCEmulator
+$fsmoS
