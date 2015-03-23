@@ -13,5 +13,13 @@ ctrl+J
 # закрепить допустимые значения переменной
 [validateset("a","b","c")][sting]$x = 
 
-# работа с результатом команды
+# получить доступные .net методы
+{someobject or command} | GM
+
+# вызов метода объекта
 $(get-process -name csrss).Id
+
+#remoting a command
+Invoke-Command -ComputerName (
+    Get-ADComputer -Filter "name -like '*comp*'" |
+    select -ExpandProperty Name ) -ScriptBlock {get-service -name bits}
