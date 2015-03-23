@@ -23,3 +23,23 @@ $(get-process -name csrss).Id
 Invoke-Command -ComputerName (
     Get-ADComputer -Filter "name -like '*comp*'" |
     select -ExpandProperty Name ) -ScriptBlock {get-service -name bits}
+
+# "if" syntax
+if ($this -eq $that) {
+	somecommand
+} 
+elseif ($that -ne $this) {
+	someothercommand
+}
+else {
+	despair-and-death
+}
+
+
+# multiple if
+switch ($flag) {
+	0 { $result = 'one' }
+	1 { $result = 'two' }
+	2 { $result = 'three' }
+
+}
