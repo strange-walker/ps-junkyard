@@ -35,11 +35,34 @@ else {
 	despair-and-death
 }
 
+#short version
+$x = if ($false) {1} else {2}
+
 
 # multiple if
-switch ($flag) {
-	0 { $result = 'one' }
-	1 { $result = 'two' }
-	2 { $result = 'three' }
+$result = switch ($flag) {
+	0 { 'one' }
+	1 { 'two' }
+	2 { 'three' }
+	default { 'unknown' }
+}
 
+# do loop
+do {
+	somecommand
+} while ($false)
+
+#while loop
+while ($false) {
+	somecommand
+}
+
+# for loop
+For ($i=0; $i -lt 100; $i++) {
+	somecommand
+}
+
+#foreach loop
+Foreach ($item in $items) {
+	somecommand
 }
