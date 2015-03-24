@@ -8,7 +8,9 @@
               DomainNamingMaster = $forest.DomainNamingMaster 
               SchemaMaster = $forest.SchemaMaster
               }
-    $fsmo
+    #$fsmo
+    $object = New-Object -TypeName PSObject -Property $fsmo
+    $object
 }
 
 #herecy grows here
