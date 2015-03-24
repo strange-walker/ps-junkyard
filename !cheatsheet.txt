@@ -4,6 +4,9 @@
 # создать шаблон функции
 ctrl+J
 
+# guess what
+get-help *function*
+
 # подробный вывод деятельности комнады
 -verbose 
 
@@ -18,6 +21,7 @@ ctrl+J
 
 # вызов метода объекта
 $(get-process -name csrss).Id
+get-service | select-object -property name
 
 #remoting a command
 Invoke-Command -ComputerName (
