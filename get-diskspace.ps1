@@ -8,21 +8,18 @@
 .EXAMPLE
    Еще один пример использования этого командлета
 #>
-function Verb-Noun
+function Get-DiskSpace
 {
     [CmdletBinding()]
-    [OutputType([int])]
     Param
     (
-        # Справочное описание параметра 1
+        # NetBios name of computer
         [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
-        $Param1,
-
-        # Справочное описание параметра 2
-        [int]
-        $Param2
+        [string]$CName,
+        # Drive letter of logical disk in format X:
+        [string[]]$DriveLetter
     )
 
     Begin
@@ -30,7 +27,7 @@ function Verb-Noun
     }
     Process
     {
-    Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceId='C:'" -ComputerName $name | 
+    Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceId='$DriveLetter'" -ComputerName $CName | 
     Select PSComputername, DeviceID, 
         @{n='Size'; e={$_.size / 1gb -as [int]}},
         @{n='Free'; e={$_.freespace / 1gb -as [int]}}
