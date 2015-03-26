@@ -17,9 +17,9 @@ function Get-DiskSpace
         [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
-        [string]$CName,
+        [string]$ComputerName,
         # Drive letter of logical disk in format X:
-        [string[]]$DriveLetter
+        [string]$DriveLetter
     )
 
     Begin
@@ -27,7 +27,7 @@ function Get-DiskSpace
     }
     Process
     {
-    Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceId='$DriveLetter'" -ComputerName $CName | 
+    Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceId='$DriveLetter'" -ComputerName $ComputerName | 
     Select PSComputername, DeviceID, 
         @{n='Size'; e={$_.size / 1gb -as [int]}},
         @{n='Free'; e={$_.freespace / 1gb -as [int]}}
