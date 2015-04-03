@@ -20,6 +20,9 @@ get-help *function*
 -ErrorAction
 -ErrorVariable
 
+# уровень назойливости
+$confirmPreference
+
 # error handling for enviro
 
 # получить доступные .net методы
