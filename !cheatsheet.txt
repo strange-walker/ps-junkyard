@@ -16,6 +16,12 @@ get-help *function*
 # закрепить допустимые значения переменной
 [validateset("a","b","c")][sting]$x = 
 
+# error handling for comandlets
+-ErrorAction
+-ErrorVariable
+
+# error handling for enviro
+
 # получить доступные .net методы
 {someobject or command} | GM
 
