@@ -17,3 +17,19 @@ $cred = Set-Credential -username "someone@example.com" -password 'Pa$$w0rd'
 #send report. Input -From, -Subject and -SMTP
 Send-MailMessage -To $maillist -From "someone@example.com" -Subject "null" -SmtpServer "null" -Credential $cred -Body $time$body -Encoding UTF8 -UseSsl
 
+#alternative view:
+
+$report = @{
+    -SmtpServer "null"
+    -Credential $cred
+    -From "someone@example.com"
+    -To $maillist
+    -Subject "null"
+    -Body $time$body
+    -Encoding UTF8
+    -UseSsl
+}
+
+#send report. Input -From, -Subject and -SMTP
+Send-MailMessage @report
+
