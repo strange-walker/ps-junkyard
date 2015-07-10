@@ -3,8 +3,9 @@ add-type -AssemblyName System.Windows.Forms
 
 #for test. remove this 2 lines
 calc
-start-sleep -Milliseconds 500
+start-sleep -Milliseconds 5000
 
-#replace "Калькулятор" with actual WINDOW TITLE
-[Microsoft.VisualBasic.Interaction]::AppActivate("Калькулятор")
+#replace "calc" with actual process
+$a = Get-Process | Where-Object {$_.Name -eq "calc"}
+[Microsoft.VisualBasic.Interaction]::AppActivate($a.ID)
 [System.Windows.Forms.SendKeys]::SendWait("%{F4}")
