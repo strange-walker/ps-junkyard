@@ -7,6 +7,13 @@
    Example of how to use this cmdlet
 .EXAMPLE
    Another example of how to use this cmdlet
+
+.todo
+    Status param for objects - online\offline
+    disk info: max, free. red highligh if low
+    monitor info
+    -worst switch - output pc with worst param
+    -file switch - also fetches cached data from file
 #>
 function Get-HardWareInfo
 {
