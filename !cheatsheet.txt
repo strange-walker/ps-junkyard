@@ -79,3 +79,7 @@ For ($i=0; $i -lt 100; $i++) {
 Foreach ($item in $items) {
 	somecommand
 }
+
+# Check WmiObject Classes
+$Type = "Disk"
+Get-WmiObject -List | Where-Object {$_.name -Match $Type}
