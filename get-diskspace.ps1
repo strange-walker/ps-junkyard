@@ -27,10 +27,23 @@ function Get-DiskSpace
     }
     Process
     {
-    Get-WmiObject -Class Win32_LogicalDisk -Filter "DeviceId='$DriveLetter'" -ComputerName $ComputerName | 
-    Select PSComputername, DeviceID, 
+
+
+$rdata = New-Object -TypeName psobject
+$disk = Get-WmiObject -Class Win32_LogicalDisk -Filter "DriveType=3" -ComputerName $ComputerName | 
+Select DeviceID, 
         @{n='Size'; e={$_.size / 1gb -as [int]}},
         @{n='Free'; e={$_.freespace / 1gb -as [int]}}
+foreach ($item in $disk.deviceid) {
+    $i=[array]::IndexOf($disk.deviceid, $item)
+    $letter = "Disk $item"
+    $value = $disk.size[$i]
+    Add-Member -InputObject $rdata -MemberType NoteProperty -Name "Disk $item capacity" -Value $disk.size[$i]
+    Add-Member -InputObject $rdata -MemberType NoteProperty -Name "Disk $item freespace" -Value $disk.Free[$i]
+
+}
+
+$rdata
     }
     End
     {
