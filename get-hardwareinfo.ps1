@@ -10,7 +10,7 @@
 
 .todo
     Status param for objects - online\offline - done
-    disk info: max, free. red highligh if low
+    ram type broken. need another solution
     monitor info
     -worst switch - output pc with worst param
     -file switch - also fetches cached data from file
@@ -39,9 +39,6 @@ function Get-HardWareInfo
         {
             $Scope = (Get-ADComputer -Filter *).name
         } 
-        # index stolen from PowerShell.com
-        $memorytype = "Unknown", "Other", "DRAM", "Synchronous DRAM", "Cache DRAM", "EDO", "EDRAM", "VRAM", "SRAM", "RAM", "ROM", "Flash", "EEPROM", "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM", "SGRAM", "RDRAM", "DDR", "DDR-2"
-
     }
     Process
 {
@@ -58,6 +55,7 @@ function Get-HardWareInfo
                     Add-Member -InputObject $rdata -MemberType NoteProperty -Name 'Total RAM (mb)' -Value ((Get-WmiObject  win32_computersystem).totalphysicalmemory / 1mb -as [int])
 
                     #here we count number of memory slots and their types. I'm putting 'foreach' here for the sake of mb's with hybrid memory slots (ddr2 and ddr3 mixed)
+                    $memorytype = "Unknown", "Other", "DRAM", "Synchronous DRAM", "Cache DRAM", "EDO", "EDRAM", "VRAM", "SRAM", "RAM", "ROM", "Flash", "EEPROM", "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM", "SGRAM", "RDRAM", "DDR", "DDR-2", "DDR2 FB-DIMM", "unknown", "DDR3", "FBD2"
                     $memslots = $memorytype[(Get-WmiObject Win32_PhysicalMemory).memorytype ] | Group-Object
                     [string]$memrep = $null
                     foreach ($item in $memslots)
@@ -87,8 +85,8 @@ function Get-HardWareInfo
                         $i=[array]::IndexOf($storage.model, $item)
                         #$i
                         #$item
-                        Add-Member -InputObject $rdata -MemberType NoteProperty -Name "HDD $i model" -Value $storage.model[$i] 
-                        Add-Member -InputObject $rdata -MemberType NoteProperty -Name "HDD $i capacity" -Value ( $storage.size[$i] / 1gb -as [int] )
+                        Add-Member -InputObject $rdata -MemberType NoteProperty -Name "ATA HDD $i model" -Value $storage.model[$i] 
+                        Add-Member -InputObject $rdata -MemberType NoteProperty -Name "ATA HDD $i capacity" -Value ( $storage.size[$i] / 1gb -as [int] )
                         }
                     $rdata
                     } -ComputerName $item )
@@ -98,7 +96,8 @@ function Get-HardWareInfo
             {
                 $data = New-Object -TypeName psobject
                 Add-Member -InputObject $data -MemberType NoteProperty -Name Computername -Value $item
-                Add-Member -InputObject $data -MemberType NoteProperty -Name 'Total RAM (mb)' -Value 'Offline'
+                Add-Member -InputObject $data -MemberType NoteProperty -Name 'Status' -Value 'Offline'
+                Add-Member -InputObject $data -MemberType NoteProperty -Name 'Total RAM (mb)' -Value 'n\a'
                 Add-Member -InputObject $data -MemberType NoteProperty -Name 'MB Vendor' -Value 'n\a'
                 Add-Member -InputObject $data -MemberType NoteProperty -Name 'MB Model' -Value 'n\a'
                 Add-Member -InputObject $data -MemberType NoteProperty -Name Processor -Value 'n\a'
@@ -115,6 +114,8 @@ function Get-HardWareInfo
     End
     {
     $report | Select Computername,'Total RAM (gb)',processor | Format-Table -AutoSize
+    Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $report -UseCulture
+    $report | Out-File -FilePath D:\scripts\hadwarereport2.csv 
     }
 }
 
