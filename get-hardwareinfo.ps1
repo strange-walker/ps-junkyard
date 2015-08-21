@@ -76,8 +76,22 @@ function Get-HardWareInfo
                 {
                 $R_entry.status = 'Online'
                 $R_entry.Total_RAM_mb = ((Get-WmiObject  win32_computersystem -ComputerName $item).totalphysicalmemory / 1mb -as [int])
-#                $R_entry.Memory_slots
-#                $R_entry.Memory_installed
+
+                #here we count number of memory slots and their types. I'm putting 'foreach' here for the sake of mb's with hybrid memory slots (ddr2 and ddr3 mixed)
+                $memslots = $memorytype[(Get-WmiObject Win32_PhysicalMemory -ComputerName $item).memorytype ] | Group-Object
+                [string]$memrep = $null
+                foreach ($item in $memslots)
+                    {
+                    $memrep += [string]$item.count + " x " + [string]$item.Name + '   '
+                    }
+                $R_entry.Memory_slots = $memrep
+                $memspace = (Get-WmiObject Win32_PhysicalMemory).capacity | Group-Object
+                $memcount = $null
+                foreach ($item in $memspace)
+                    {
+                    $memcount += [string]$item.count + " x " + [string]($item.Name/ 1mb -as [int]) + ' MB  '
+                    }
+                $R_entry.Memory_installed = $memcount
                 $R_entry.MB_Vendor = (Get-WmiObject Win32_BaseBoard -ComputerName $item).manufacturer
                 $R_entry.MB_Model = (Get-WmiObject Win32_BaseBoard -ComputerName $item).product
                 $R_entry.Processor = (Get-WmiObject win32_processor -ComputerName $item).name
@@ -104,39 +118,19 @@ function Get-HardWareInfo
 
 
 
-                    #here we count number of memory slots and their types. I'm putting 'foreach' here for the sake of mb's with hybrid memory slots (ddr2 and ddr3 mixed)
-                    
-                    
-                    
-                    $memslots = $memorytype[(Get-WmiObject Win32_PhysicalMemory).memorytype ] | Group-Object
-                    [string]$memrep = $null
-                    foreach ($item in $memslots)
-                        {
-                        $memrep += [string]$item.count + " x " + [string]$item.Name + '   '
-                        }
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name Memory_slots -Value $memrep
-                    $memspace = (Get-WmiObject Win32_PhysicalMemory).capacity | Group-Object
-                    $memcount = $null
-                    foreach ($item in $memspace)
-                        {
-                        $memcount += [string]$item.count + " x " + [string]($item.Name/ 1mb -as [int]) + ' MB  '
-                        }
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name Memory_installed -Value $memcount
-
-
 
                     #count the number of hdd's installed and report their models and capacity
-                    $storage = Get-WmiObject win32_diskdrive | Where-Object {$_.model -like '*ATA Device*'}
-                    foreach ($item in $storage.model)
-                    {
-                        $i=[array]::IndexOf($storage.model, $item)
+      #              $storage = Get-WmiObject win32_diskdrive | Where-Object {$_.model -like '*ATA Device*'}
+       #             foreach ($item in $storage.model)
+        #            {
+         #               $i=[array]::IndexOf($storage.model, $item)
                         #$i
                         #$item
-                        Add-Member -InputObject $rdata -MemberType NoteProperty -Name "ATA HDD $i model" -Value $storage.model[$i] 
-                        Add-Member -InputObject $rdata -MemberType NoteProperty -Name "ATA HDD $i capacity" -Value ( $storage.size[$i] / 1gb -as [int] )
-                        }
-                    $rdata
-                    } -ComputerName $item )
-                $data
+#                        Add-Member -InputObject $rdata -MemberType NoteProperty -Name "ATA HDD $i model" -Value $storage.model[$i] 
+ #                       Add-Member -InputObject $rdata -MemberType NoteProperty -Name "ATA HDD $i capacity" -Value ( $storage.size[$i] / 1gb -as [int] )
+  #                      }
+   #                 $rdata
+    #                } -ComputerName $item )
+     #           $data
 
          
