@@ -39,44 +39,91 @@ function Get-HardWareInfo
         {
             $Scope = (Get-ADComputer -Filter *).name
         } 
+
+        $memorytype = "Unknown", "Other", "DRAM", "Synchronous DRAM", "Cache DRAM", "EDO", "EDRAM", "VRAM", "SRAM", "RAM", "ROM", "Flash", "EEPROM", "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM", "SGRAM", "RDRAM", "DDR", "DDR-2", "DDR2 FB-DIMM", "unknown", "DDR3", "FBD2"
+
+
+        $R_template = New-Object -TypeName psobject
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name Computername -Value uno
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name Status -Value 'Offline'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name Total_RAM_mb -Value 'n\a'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name Memory_slots -Value 'n\a'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name Memory_installed -Value 'n\a'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name MB_Vendor -Value 'n\a'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name MB_Model -Value 'n\a'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name Processor -Value 'n\a'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name VideoAdapter -Value 'n\a'
     }
     Process
-{
-        $report = @()
+    {
+        $R_report = @()
+
         foreach ($item in $Scope)
         {
-            if (Test-Connection -ComputerName $item -Count 2 -Quiet)
-            {
-                $data = (Invoke-Command -ScriptBlock {
-                    $rdata = New-Object -TypeName psobject
-                    #simple wmi queries
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name Computername -Value (Get-WmiObject  win32_computersystem).name
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name Status -Value 'Online'
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name 'Total RAM (mb)' -Value ((Get-WmiObject  win32_computersystem).totalphysicalmemory / 1mb -as [int])
+            #initialize object 
+            $R_entry = $R_template.psobject.copy()
+            $R_entry.computername = $item
+
+            if ((Test-Connection -ComputerName $item -Count 2 -Quiet) -eq $false)
+                {
+                $R_entry.status = 'Offline'
+                }
+            #elseif (((Get-WmiObject -ComputerName $item win32_computersystem).name) -ne $item )
+            #    {
+            #    $R_entry.status = 'WinRM connection error'    
+            #    }
+            else
+                {
+                $R_entry.status = 'Online'
+                $R_entry.Total_RAM_mb = ((Get-WmiObject  win32_computersystem -ComputerName $item).totalphysicalmemory / 1mb -as [int])
+#                $R_entry.Memory_slots
+#                $R_entry.Memory_installed
+                $R_entry.MB_Vendor = (Get-WmiObject Win32_BaseBoard -ComputerName $item).manufacturer
+                $R_entry.MB_Model = (Get-WmiObject Win32_BaseBoard -ComputerName $item).product
+                $R_entry.Processor = (Get-WmiObject win32_processor -ComputerName $item).name
+                $R_entry.VideoAdapter = (Get-WmiObject Win32_VideoController -ComputerName $item).name
+
+                }
+            $R_entry
+            $R_report += $R_entry
+        }
+        
+    $R_report
+    
+    }
+    End
+    {
+    $R_report | Select Computername,Total_RAM_mb,processor | Format-Table -AutoSize
+    foreach ($item in $R_report)
+        {
+        Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $item -UseCulture -NoTypeInformation -Append
+        }
+    }
+}
+
+
+
 
                     #here we count number of memory slots and their types. I'm putting 'foreach' here for the sake of mb's with hybrid memory slots (ddr2 and ddr3 mixed)
-                    $memorytype = "Unknown", "Other", "DRAM", "Synchronous DRAM", "Cache DRAM", "EDO", "EDRAM", "VRAM", "SRAM", "RAM", "ROM", "Flash", "EEPROM", "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM", "SGRAM", "RDRAM", "DDR", "DDR-2", "DDR2 FB-DIMM", "unknown", "DDR3", "FBD2"
+                    
+                    
+                    
                     $memslots = $memorytype[(Get-WmiObject Win32_PhysicalMemory).memorytype ] | Group-Object
                     [string]$memrep = $null
                     foreach ($item in $memslots)
                         {
                         $memrep += [string]$item.count + " x " + [string]$item.Name + '   '
                         }
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name 'Memory slots' -Value $memrep
+                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name Memory_slots -Value $memrep
                     $memspace = (Get-WmiObject Win32_PhysicalMemory).capacity | Group-Object
                     $memcount = $null
                     foreach ($item in $memspace)
                         {
                         $memcount += [string]$item.count + " x " + [string]($item.Name/ 1mb -as [int]) + ' MB  '
                         }
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name 'Memory installed' -Value $memcount
+                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name Memory_installed -Value $memcount
 
 
-                    #more simple wmi queries
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name 'MB Vendor' -Value (Get-WmiObject Win32_BaseBoard).manufacturer
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name 'MB Model' -Value (Get-WmiObject Win32_BaseBoard).product
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name Processor -Value (Get-WmiObject win32_processor).name
-                    Add-Member -InputObject $rdata -MemberType NoteProperty -Name VideoAdapter -Value(Get-WmiObject Win32_VideoController).name
 
                     #count the number of hdd's installed and report their models and capacity
                     $storage = Get-WmiObject win32_diskdrive | Where-Object {$_.model -like '*ATA Device*'}
@@ -91,31 +138,5 @@ function Get-HardWareInfo
                     $rdata
                     } -ComputerName $item )
                 $data
-            }
-            else
-            {
-                $data = New-Object -TypeName psobject
-                Add-Member -InputObject $data -MemberType NoteProperty -Name Computername -Value $item
-                Add-Member -InputObject $data -MemberType NoteProperty -Name 'Status' -Value 'Offline'
-                Add-Member -InputObject $data -MemberType NoteProperty -Name 'Total RAM (mb)' -Value 'n\a'
-                Add-Member -InputObject $data -MemberType NoteProperty -Name 'MB Vendor' -Value 'n\a'
-                Add-Member -InputObject $data -MemberType NoteProperty -Name 'MB Model' -Value 'n\a'
-                Add-Member -InputObject $data -MemberType NoteProperty -Name Processor -Value 'n\a'
-                $data
-            }
 
-
-            $report += $data
-        }
-        
-    
-    
-    }
-    End
-    {
-    $report | Select Computername,'Total RAM (gb)',processor | Format-Table -AutoSize
-    Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $report -UseCulture
-    $report | Out-File -FilePath D:\scripts\hadwarereport2.csv 
-    }
-}
-
+         
