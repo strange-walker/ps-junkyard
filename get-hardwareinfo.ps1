@@ -34,11 +34,11 @@ function Get-HardWareInfo
     )
 
     Begin
-    {
-        if ($Scope -eq 'domain') 
         {
+        if ($Scope -eq 'domain') 
+            {
             $Scope = (Get-ADComputer -Filter *).name
-        } 
+            } 
 
         $memorytype = "Unknown", "Other", "DRAM", "Synchronous DRAM", "Cache DRAM", "EDO", "EDRAM", "VRAM", "SRAM", "RAM", "ROM", "Flash", "EEPROM", "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM", "SGRAM", "RDRAM", "DDR", "DDR-2", "DDR2 FB-DIMM", "unknown", "DDR3", "FBD2"
 
@@ -53,66 +53,67 @@ function Get-HardWareInfo
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name MB_Model -Value 'n\a'
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name Processor -Value 'n\a'
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name VideoAdapter -Value 'n\a'
-    }
+        }
     Process
-    {
+        {
         $R_report = @()
 
-        foreach ($item in $Scope)
+        foreach ($comp in $Scope)
         {
             #initialize object 
             $R_entry = $R_template.psobject.copy()
-            $R_entry.computername = $item
+            $R_entry.computername = $comp
+            $er = (Get-WmiObject  win32_computersystem -ComputerName $comp -ErrorAction SilentlyContinue).name
 
-            if ((Test-Connection -ComputerName $item -Count 2 -Quiet) -eq $false)
+            if ($er -ne $comp)
                 {
-                $R_entry.status = 'Offline'
+                if ((Test-Connection -ComputerName $comp -Count 2 -Quiet) -eq $false)
+                    {
+                    $R_entry.status = 'Offline'
+                    }
+                else
+                    {
+                    $R_entry.status = 'WinRM connection error'  
+                    }
                 }
-            #elseif (((Get-WmiObject -ComputerName $item win32_computersystem).name) -ne $item )
-            #    {
-            #    $R_entry.status = 'WinRM connection error'    
-            #    }
             else
                 {
                 $R_entry.status = 'Online'
-                $R_entry.Total_RAM_mb = ((Get-WmiObject  win32_computersystem -ComputerName $item).totalphysicalmemory / 1mb -as [int])
+                $R_entry.Total_RAM_mb = ((Get-WmiObject  win32_computersystem -ComputerName $comp).totalphysicalmemory / 1mb -as [int])
 
                 #here we count number of memory slots and their types. I'm putting 'foreach' here for the sake of mb's with hybrid memory slots (ddr2 and ddr3 mixed)
-                $memslots = $memorytype[(Get-WmiObject Win32_PhysicalMemory -ComputerName $item).memorytype ] | Group-Object
-                [string]$memrep = $null
+                $memslots = $memorytype[(Get-WmiObject Win32_PhysicalMemory -ComputerName $comp).memorytype ] | Group-Object
                 foreach ($item in $memslots)
                     {
                     $memrep += [string]$item.count + " x " + [string]$item.Name + '   '
                     }
                 $R_entry.Memory_slots = $memrep
                 $memspace = (Get-WmiObject Win32_PhysicalMemory).capacity | Group-Object
-                $memcount = $null
                 foreach ($item in $memspace)
                     {
                     $memcount += [string]$item.count + " x " + [string]($item.Name/ 1mb -as [int]) + ' MB  '
                     }
                 $R_entry.Memory_installed = $memcount
-                $R_entry.MB_Vendor = (Get-WmiObject Win32_BaseBoard -ComputerName $item).manufacturer
-                $R_entry.MB_Model = (Get-WmiObject Win32_BaseBoard -ComputerName $item).product
-                $R_entry.Processor = (Get-WmiObject win32_processor -ComputerName $item).name
-                $R_entry.VideoAdapter = (Get-WmiObject Win32_VideoController -ComputerName $item).name
-
+                $R_entry.MB_Vendor = (Get-WmiObject Win32_BaseBoard -ComputerName $comp).manufacturer
+                $R_entry.MB_Model = (Get-WmiObject Win32_BaseBoard -ComputerName $comp).product
+                $R_entry.Processor = (Get-WmiObject win32_processor -ComputerName $comp).name
+                $R_entry.VideoAdapter = (Get-WmiObject Win32_VideoController -ComputerName $comp).name
+                clv memrep, memcount, memspace, memslots
                 }
             $R_entry
             $R_report += $R_entry
-        }
+            }
         
-    $R_report
-    
-    }
-    End
-    {
-    $R_report | Select Computername,Total_RAM_mb,processor | Format-Table -AutoSize
-    foreach ($item in $R_report)
-        {
-        Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $item -UseCulture -NoTypeInformation -Append
+        $R_report
         }
-    }
+    End
+        {
+        $R_report | Select Computername,Total_RAM_mb,processor | Format-Table -AutoSize
+        foreach ($item in $R_report)
+            {
+            Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $item -UseCulture -NoTypeInformation -Append
+            }
+        }
 }
 
 
