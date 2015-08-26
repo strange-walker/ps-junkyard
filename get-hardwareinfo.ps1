@@ -65,7 +65,7 @@ function Get-HardWareInfo
             $R_entry.computername = $comp
             $er = (Get-WmiObject  win32_computersystem -ComputerName $comp -ErrorAction SilentlyContinue).name
 
-            if ($er -ne $comp)
+            if (($er -ne $comp) -and ($comp -ne 'localhost'))
                 {
                 if ((Test-Connection -ComputerName $comp -Count 2 -Quiet) -eq $false)
                     {
@@ -88,7 +88,7 @@ function Get-HardWareInfo
                     $memrep += [string]$item.count + " x " + [string]$item.Name + '   '
                     }
                 $R_entry.Memory_slots = $memrep
-                $memspace = (Get-WmiObject Win32_PhysicalMemory).capacity | Group-Object
+                $memspace = (Get-WmiObject Win32_PhysicalMemory -ComputerName $comp).capacity | Group-Object
                 foreach ($item in $memspace)
                     {
                     $memcount += [string]$item.count + " x " + [string]($item.Name/ 1mb -as [int]) + ' MB  '
