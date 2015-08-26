@@ -53,6 +53,7 @@ function Get-HardWareInfo
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name MB_Model -Value 'n\a'
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name Processor -Value 'n\a'
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name VideoAdapter -Value 'n\a'
+        Add-Member -InputObject $R_template -MemberType NoteProperty -Name Monitor -Value 'n\a'
         }
     Process
         {
@@ -98,13 +99,13 @@ function Get-HardWareInfo
                 $R_entry.MB_Model = (Get-WmiObject Win32_BaseBoard -ComputerName $comp).product
                 $R_entry.Processor = (Get-WmiObject win32_processor -ComputerName $comp).name
                 $R_entry.VideoAdapter = (Get-WmiObject Win32_VideoController -ComputerName $comp).name
+                $R_entry.Monitor = (Get-WmiObject Win32_Desktopmonitor -ComputerName $comp).name
                 clv memrep, memcount, memspace, memslots
                 }
             $R_entry
             $R_report += $R_entry
             }
         
-        $R_report
         }
     End
         {
