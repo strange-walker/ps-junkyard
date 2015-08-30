@@ -27,10 +27,10 @@ function Get-HardWareInfo
         $Scope='localhost',
 
         # Param2 help description
-        [int]
-        $Param2,
+        [string]$File = 'c:\null',
+        [switch]$Detailed,
+        [switch]$Cache
 
-        [switch]$Detailed
     )
 
     Begin
@@ -41,7 +41,7 @@ function Get-HardWareInfo
             } 
 
         $memorytype = "Unknown", "Other", "DRAM", "Synchronous DRAM", "Cache DRAM", "EDO", "EDRAM", "VRAM", "SRAM", "RAM", "ROM", "Flash", "EEPROM", "FEPROM", "EPROM", "CDRAM", "3DRAM", "SDRAM", "SGRAM", "RDRAM", "DDR", "DDR-2", "DDR2 FB-DIMM", "unknown", "DDR3", "FBD2"
-
+        $R_report = @()
 
         $R_template = New-Object -TypeName psobject
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name Computername -Value uno
@@ -54,13 +54,24 @@ function Get-HardWareInfo
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name Processor -Value 'n\a'
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name VideoAdapter -Value 'n\a'
         Add-Member -InputObject $R_template -MemberType NoteProperty -Name Monitor -Value 'n\a'
+
+        if ($Cache) 
+            {
+            if (Test-Path $File) 
+                {
+                $R_report = Import-Csv -Path $File -UseCulture
+                }
+            else 
+                {
+                throw "File not provided or path invalid"
+                break
+                }
+            }
         }
     Process
         {
-        $R_report = @()
-
         foreach ($comp in $Scope)
-        {
+            {
             #initialize object 
             $R_entry = $R_template.psobject.copy()
             $R_entry.computername = $comp
@@ -110,9 +121,16 @@ function Get-HardWareInfo
     End
         {
         $R_report | Select Computername,Total_RAM_mb,processor | Format-Table -AutoSize
-        foreach ($item in $R_report)
+        if ($File -ne $null)
             {
-            Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $item -UseCulture -NoTypeInformation -Append
+            if (Test-Path $File)
+                {
+                Remove-Item $File
+                }
+            foreach ($item in $R_report)
+                {
+                Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $item -UseCulture -NoTypeInformation -Append
+                }
             }
         }
 }
