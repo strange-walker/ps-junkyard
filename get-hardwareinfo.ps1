@@ -108,9 +108,9 @@ function Get-HardWareInfo
                 $R_entry.Memory_installed = $memcount
                 $R_entry.MB_Vendor = (Get-WmiObject Win32_BaseBoard -ComputerName $comp).manufacturer
                 $R_entry.MB_Model = (Get-WmiObject Win32_BaseBoard -ComputerName $comp).product
-                $R_entry.Processor = (Get-WmiObject win32_processor -ComputerName $comp).name
-                $R_entry.VideoAdapter = (Get-WmiObject Win32_VideoController -ComputerName $comp).name
-                $R_entry.Monitor = (Get-WmiObject Win32_Desktopmonitor -ComputerName $comp).name
+                $R_entry.Processor = [string](Get-WmiObject win32_processor -ComputerName $comp).name
+                $R_entry.VideoAdapter = [string](Get-WmiObject Win32_VideoController -ComputerName $comp).name
+                $R_entry.Monitor = [string](Get-WmiObject Win32_Desktopmonitor -ComputerName $comp).name
                 clv memrep, memcount, memspace, memslots
                 }
             $R_entry
@@ -129,7 +129,7 @@ function Get-HardWareInfo
                 }
             foreach ($item in $R_report)
                 {
-                Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $item -UseCulture -NoTypeInformation -Append
+                Export-Csv -Path D:\scripts\hadwarereport.csv -InputObject $item -UseCulture -NoTypeInformation -Append -Encoding UTF8
                 }
             }
         }
