@@ -37,6 +37,11 @@ function Get-DirInfo
             $folder | Add-Member -type NoteProperty -Name 'Folder' -Value $Path
             $folder | Add-Member -type NoteProperty -Name 'Size' -Value $size
             $result += $folder
+            foreach ($item in (Get-ChildItem $Path))
+                {
+                    
+                }
+
             $result += Get-DirInfo -Path $Path -Depth ($depth - 1)
             }
         else
