@@ -19,27 +19,30 @@ function Get-DirInfo
         [Parameter(ValueFromPipelineByPropertyName=$true,
                    Position=0)]
         $Path = (pwd).Path,
-        [int]$Depth = 1
+        [int]$Depth = 2
 
     )
 
     Begin
     {
-    $result = $null
+    $result = @()
     }
     Process
     {
         if ($Depth -gt 0)
             {
-            $result += Get-DirInfo ($Path, ($Depth - 1))
-            }
-        else
-            {
+            $depth
             $size = (Get-ChildItem $Path -Recurse | Measure-Object -Property length -Sum).Sum/1mb 
             $folder = New-Object PSObject
             $folder | Add-Member -type NoteProperty -Name 'Folder' -Value $Path
             $folder | Add-Member -type NoteProperty -Name 'Size' -Value $size
             $result += $folder
+            $result += Get-DirInfo -Path $Path -Depth ($depth - 1)
+            }
+        else
+            {
+
+            
             }
         
     }
@@ -48,5 +51,4 @@ function Get-DirInfo
     $result
     }
 }
-
 
