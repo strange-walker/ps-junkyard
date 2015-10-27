@@ -19,32 +19,42 @@ function Get-DirInfo
         [Parameter(ValueFromPipelineByPropertyName=$true,
                    Position=0)]
         $Path = (pwd).Path,
-        [int]$Depth = 2
+        # Param2 help description
+        [int]$Depth = 2,
+        # Param3 help description
+        [ValidateSet ('gb', 'mb')]
+        [string]
+        $Measure = 'mb'
 
     )
 
     Begin
     {
     $result = @()
+    $FSO = New-Object -ComObject Scripting.FileSystemObject
+
+
     if ($path[-1] -ne '\')
         {
         $Path += '\'
         }
+        
     }
     Process
     {
         if ($Depth -gt 0)
             {
-            #$depth
-            $size = (Get-ChildItem $Path -Recurse | Measure-Object -Property length -Sum).Sum/1mb -as [int]
+            #I'm using FSObject instead of simple get-childitem\measure-object because of conflict with square brackets. BTW it's much faster :)
+            if ($Measure -eq 'mb') {$size = $FSO.GetFolder($Path).Size/1mb -as [int]}
+            if ($Measure -eq 'gb') {$size = $FSO.GetFolder($Path).Size/1gb -as [int]}
             $folder = New-Object PSObject
             $folder | Add-Member -type NoteProperty -Name 'Folder' -Value $Path
-            $folder | Add-Member -type NoteProperty -Name '     Size (MB)' -Value $size
+            $folder | Add-Member -type NoteProperty -Name '     Size ()' -Value $size
             $result += $folder
-            $subfolders = (Get-ChildItem $Path | Where-Object {$_.Mode -like 'd*'}).Name
+            $subfolders = (Get-ChildItem -LiteralPath $Path -Directory -Force).Name
             foreach ($item in $subfolders)
                 {
-                $result += Get-DirInfo -Path ($path + $item + '\') -Depth ($depth - 1)    
+                $result += Get-DirInfo -Path ($path + $item) -Depth ($depth - 1) -Measure $Measure   
                 }
 
             
