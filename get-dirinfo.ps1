@@ -15,17 +15,16 @@ function Get-DirInfo
     [OutputType([int])]
     Param
     (
-        # Param1 help description
+        # Defines directory being studied. Default is current directory.
         [Parameter(ValueFromPipelineByPropertyName=$true,
                    Position=0)]
         $Path = (pwd).Path,
-        # Param2 help description
+        # Defines number of subfolders scanned. 1 is for currnet folder only.
         [int]$Depth = 2,
         # Param3 help description
         [ValidateSet ('gb', 'mb')]
         [string]
         $Measure = 'mb'
-
     )
 
     Begin
@@ -56,15 +55,7 @@ function Get-DirInfo
                 {
                 $result += Get-DirInfo -Path ($path + $item) -Depth ($depth - 1) -Measure $Measure   
                 }
-
-            
             }
-        else
-            {
-
-            
-            }
-        
     }
     End
     {
