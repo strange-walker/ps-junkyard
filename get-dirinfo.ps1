@@ -44,7 +44,7 @@ function Get-DirInfo
         if ($Depth -gt 0)
             {
             #I'm using FSObject instead of simple get-childitem\measure-object because of conflict with square brackets. BTW it's much faster :)
-            if ($Measure -eq 'mb') {$size = $FSO.GetFolder($Path).Size}
+            if ($Measure -eq 'mb') {$size = $FSO.GetFolder($Path).Size/1mb -as [int]}
             if ($Measure -eq 'gb') {$size = $FSO.GetFolder($Path).Size/1gb -as [int]}
             $folder = New-Object PSObject
             $folder | Add-Member -type NoteProperty -Name 'Folder' -Value $Path

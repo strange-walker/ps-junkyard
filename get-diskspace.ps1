@@ -46,7 +46,6 @@ foreach ($item in $disk.deviceid) {
     $report += $disk2
 }
 
-$report
     }
     End
     {
