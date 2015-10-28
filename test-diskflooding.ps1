@@ -29,7 +29,7 @@ function Test-DiskFlooding
     Begin
     {
     $report = $null
-    $alerts = $null
+    $alerts = @()
     if ($Scope -eq 'domain') 
             {
             $Scope = (Get-ADComputer -Filter *).name
@@ -45,33 +45,27 @@ function Test-DiskFlooding
             {
             if ($x.Capacity -in 1..20)
                 {
-                $x.name
-                Write-Host 'Tiny'
+                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             elseif ($x.Capacity -in 21..80)
                 {
-                $x.name
-                Write-Host 'Small'   
+            if ($x.Freespace -lt 200) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             elseif ($x.Capacity -in 81..200)
                 {
-                $x.name
-                Write-Host 'Medium'   
+                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             elseif ($x.Capacity -in 201..500)
                 {
-                $x.name
-                Write-Host 'Big'   
+                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")} 
                 }
             elseif ($x.Capacity -in 501..1000)
                 {
-                $x.name
-                Write-Host 'Huge'   
+                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}  
                 }
             elseif ($x.Capacity -gt 1000)
                 {
-                $x.name
-                Write-Host 'SAN'   
+                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             }
         }
@@ -79,5 +73,6 @@ function Test-DiskFlooding
     }
     End
     {
+    $alerts
     }
 }
