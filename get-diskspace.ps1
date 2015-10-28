@@ -17,9 +17,8 @@ function Get-DiskSpace
         [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
-        [string]$ComputerName = 'localhost',
-        # Drive letter of logical disk in format X:
-        [string]$DriveLetter
+        [string]$ComputerName = 'localhost'
+
     )
 
     Begin
