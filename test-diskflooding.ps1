@@ -45,27 +45,27 @@ function Test-DiskFlooding
             {
             if ($x.Capacity -in 1..20)
                 {
-                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
+                if ($x.Freespace -lt 5) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             elseif ($x.Capacity -in 21..80)
                 {
-            if ($x.Freespace -lt 200) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
+            if ($x.Freespace -lt 10) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             elseif ($x.Capacity -in 81..200)
                 {
-                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
+                if ($x.Freespace -lt 20) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             elseif ($x.Capacity -in 201..500)
                 {
-                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")} 
+                if ($x.Freespace -lt 30) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")} 
                 }
             elseif ($x.Capacity -in 501..1000)
                 {
-                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}  
+                if ($x.Freespace -lt 50) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}  
                 }
             elseif ($x.Capacity -gt 1000)
                 {
-                if ($x.Freespace -lt 500) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
+                if ($x.Freespace -lt 100) { $alerts += ("$item Disk " +$x.name + " running low. " + $x.Freespace + " GB out of " + $x.Capacity + " left.")}
                 }
             }
         }
