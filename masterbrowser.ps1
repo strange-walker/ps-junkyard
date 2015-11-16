@@ -2,7 +2,7 @@
 $netbios = @()
 
 #extract netbios names from raw data
-foreach ($item in $NewRat)
+foreach ($item in $NetRaw)
 {
      if ($item[1] -eq "\" ) 
         { 
@@ -14,6 +14,7 @@ foreach ($item in $NewRat)
 }
 
 
+#query each machine and test if it is master browser
 foreach ($item in $netbios)
 {
 
