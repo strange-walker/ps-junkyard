@@ -1,30 +1,28 @@
-﻿$test = net view
-
+﻿$NetRaw = net view
 $netbios = @()
-foreach ($item in $test)
+
+#extract netbios names from raw data
+foreach ($item in $NewRat)
 {
-#$item[1]
      if ($item[1] -eq "\" ) 
         { 
         $temp = $item.Trim("\"," ")
-        #$temp = $temp.Substring(0, $temp.IndexOf(' '))
         $temp = $temp.split(' ')[0] 
         $netbios += $temp
         }
 
 }
 
-$netbios
-
-
-
-$out = @()
 
 foreach ($item in $netbios)
 {
-    $out += (nbtstat -a $item)
+
+    if ((select-string -pattern "MSBROWSE" -InputObject (nbtstat -a $item)) -ne $null)
+    {
+        $result = $item
+    }
+
 }
 
 
-$out > D:\scripts\mb.txt
-
+$result
