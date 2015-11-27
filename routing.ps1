@@ -62,12 +62,23 @@ function Restore-RouteTable
     Begin
     {
     $routes = Import-Csv $Path
+    $CurrentTable = Get-NetRoute | Where-Object {$_.RouteMetric -eq 1}
     }
     Process
     {
     foreach ($item in $routes)
         {
-        New-NetRoute -DestinationPrefix $item.DestinationPrefix -InterfaceIndex $item.ifindex -NextHop $item.nexthop -RouteMetric 1
+        if ($CurrentTable.DestinationPrefix -contains $item.DestinationPrefix)
+            {
+            Write-Host "Route to " $item.DestinationPrefix " already exists."
+            }
+        else
+            {
+            New-NetRoute -DestinationPrefix $item.DestinationPrefix -InterfaceIndex $item.ifindex -NextHop $item.nexthop -RouteMetric 1
+            Write-Host "Route to " $item.DestinationPrefix " added to routing table."
+            }
+
+        
         }
     }
     End
