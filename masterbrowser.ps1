@@ -6,9 +6,7 @@ foreach ($item in $NetRaw)
 {
      if ($item[1] -eq "\" ) 
         { 
-        $temp = $item.Trim("\"," ")
-        $temp = $temp.split(' ')[0] 
-        $netbios += $temp
+        $netbios += $item.Substring(2, $item.IndexOf(" "))
         }
 
 }

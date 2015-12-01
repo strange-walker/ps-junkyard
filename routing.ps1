@@ -1,12 +1,14 @@
 ﻿<#
 .Synopsis
-   Short description
+   Saves static routes to a csv file
 .DESCRIPTION
-   Long description
+   Backup-RouteTable function parses windows machine routing table, selects all static entries (metric = 1) and saves them to a file. 
+   Default file location is C:\rt.csv
 .EXAMPLE
-   Example of how to use this cmdlet
-.EXAMPLE
-   Another example of how to use this cmdlet
+   Backup-RouteTable -Path D:\scripts\rt.csv
+
+.ToDoList
+    *support for non-existing files?
 #>
 function Backup-RouteTable
 {
@@ -14,21 +16,21 @@ function Backup-RouteTable
     [OutputType([int])]
     Param
     (
-        # Param1 help description
-        $Path = "C:\routetable.csv"
-
+        # Specifies a full path to a backup file. Default is C:\rt.csv
+        [ValidateScript({Test-Path $_.Substring(0, $_.LastIndexOf("\"))})]
+        $File = "C:\rt.csv"
     )
 
     Begin
-    {
-    }
+        {
+        }
     Process
-    {
-    Get-NetRoute | Where-Object {$_.RouteMetric -eq 1} | Export-Csv -Path $Path
-    }
+        {
+        Get-NetRoute | Where-Object {$_.RouteMetric -eq 1} | Export-Csv -Path $File
+        }
     End
-    {
-    }
+        {
+        }
 }
 
 
