@@ -1,12 +1,18 @@
 ﻿<#
 .Synopsis
-   Short description
+   Test win32 filesystem path validity
 .DESCRIPTION
-   Long description
+   Validate-Path tests if provided string may be used as a filesystem path in windows system for logical, network or removable storage
+   It doesn't test if [-Path] actually exists.
 .EXAMPLE
-   Example of how to use this cmdlet
+   PS C:\> Validate-Path -Path C:\WINDOWS\system32
+
+   True
+
 .EXAMPLE
-   Another example of how to use this cmdlet
+   PS C:\> Validate-Path -Path D:\Somefolder\coN1\more\folders\to\come
+
+   False
 #>
 function Validate-Path
 {
@@ -15,7 +21,7 @@ function Validate-Path
     [OutputType([int])]
     Param
     (
-        # Param1 help description
+        # String belived to be filesystem path
         [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
@@ -25,34 +31,35 @@ function Validate-Path
     Begin
         {
         $verdict = $false
-        $drive = $false
-        $folder = $false
-
         $folders = $Path.Substring(3)
         }
     Process
         {
-        #verify disk type (hdd, removable or network) and connectivity
+        #verify disk type (hdd, removable or network) and connectivity. drive types: flash = 2, hdd = 3, network disk = 4
         $driveletter = $path.Substring(0,2)
-        #drive types: flash = 2, hdd = 3, network disk = 4
         $driveobject = Get-WmiObject -Class Win32_LogicalDisk | Where-Object {$_.DeviceID -eq $driveletter -and $_.DriveType -match '[234]'}
-        if ($driveobject.freespace -ne $null)
-            {
-            $drive = $true
-            }
+        $drive = ($driveobject.freespace -ne $null)
         
-        # list of forbidden symbols https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx#win32_file_namespaces
-        $bannedobjects = ("CON","PRN","AUX","NUL","COM1","COM2","COM3","COM4","COM5","COM6","COM7","COM8","COM9","LPT1","LPT2","LPT3","LPT4","LPT5","LPT6","LPT7","LPT8","LPT9")
-        $bannedsymbols = ("<",">",":","/","\\","|","?","*",'"')
-
+        # list of forbidden symbols and objects https://msdn.microsoft.com/en-us/library/windows/desktop/aa365247%28v=vs.85%29.aspx#win32_file_namespaces
+        $folder = !(($folders -match '\\com[1-9]\\') -or 
+                    ($folders -match '\\lpt[1-9]\\') -or 
+                    ($folders -match '\\con\\') -or 
+                    ($folders -match '\\prn\\') -or
+                    ($folders -match '\\aux\\') -or 
+                    ($folders -match '\\nul\\') -or 
+                    ($folders -match '\*') -or 
+                    ($folders -match '\<') -or 
+                    ($folders -match '\>') -or 
+                    ($folders -match '\:') -or 
+                    ($folders -match '\/') -or 
+                    ($folders -match '\\\\') -or 
+                    ($folders -match '\|') -or 
+                    ($folders -match '\?') -or 
+                    ($folders -match '\"') )
         }
     End
         {
-        $drive
-        $folder
         $verdict = $drive -and $folder
         $verdict
         }
 }
-
-NUL.txt is not recommended. For more information, see Namespaces.
