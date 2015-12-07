@@ -1,8 +1,8 @@
 ﻿<#
 .Synopsis
-   Test win32 filesystem path validity
+   Test NTFS filesystem path validity
 .DESCRIPTION
-   Validate-Path tests if provided string may be used as a filesystem path in windows system for logical, network or removable storage
+   Validate-Path tests if provided string may be used as a filesystem path in windows system for logical, network attached or removable storage
    It doesn't test if [-Path] actually exists.
 .EXAMPLE
    PS C:\> Validate-Path -Path C:\WINDOWS\system32
@@ -13,6 +13,10 @@
    PS C:\> Validate-Path -Path D:\Somefolder\coN1\more\folders\to\come
 
    False
+
+.ToDo List
+    * [-ShortNames] switch for 8.3 naming
+    * UNC (\\server\folder) support
 #>
 function Validate-Path
 {
@@ -55,7 +59,9 @@ function Validate-Path
                     ($folders -match '\\\\') -or 
                     ($folders -match '\|') -or 
                     ($folders -match '\?') -or 
-                    ($folders -match '\"') )
+                    ($folders -match '\"') -or
+                    ($folders.Length -ge 260) ) #MAX_PATH check
+
         }
     End
         {
