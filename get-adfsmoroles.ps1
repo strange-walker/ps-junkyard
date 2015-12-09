@@ -15,7 +15,7 @@
 
 #herecy grows here
 
-$fsmo1 = Get-FSMORoles
-$fsmo2 = Get-ADDomain | select RIDMaster, InfrastructureMaster, PDCEmulator
-Get-Member -InputObject $fsmo1
-Get-Member -InputObject $fsmo2
+#$fsmo1 = Get-FSMORoles
+#$fsmo2 = Get-ADDomain | select RIDMaster, InfrastructureMaster, PDCEmulator
+#Get-Member -InputObject $fsmo1
+#Get-Member -InputObject $fsmo2
