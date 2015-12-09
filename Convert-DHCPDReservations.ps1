@@ -32,6 +32,40 @@ function Convert-DHCPDReservations
     Begin
     {
     $dhcpd = Get-Content -Path $File
+    $h = @()
+    $i = 0
+    $line = $dhcpd[0]
+    while ($i -lt $dhcpd.Count)
+                                                                                            {
+     #$i
+     if ($line.StartsWith('#'))
+     {
+         $i++
+         $line = $dhcpd[$i]
+
+     }
+     else
+     {
+     #$stroka = $d[$i]
+             if ($line.EndsWith(';') -or $line.EndsWith('{'))
+             {
+             $line = $line + $dhcpd[$i+1]
+             #$i++
+             }
+         else
+             {
+             $h += $line
+             $line = $dhcpd[$i+1]     
+             }
+      $i++     
+     }
+
+      
+    }
+    $dhcpd = $h
+
+
+
 
     $dhcp = @()
     $hostobj = New-Object -TypeName psobject
@@ -47,12 +81,25 @@ function Convert-DHCPDReservations
          {
             
             $host_entry = $hostobj.psobject.copy()
+            
+            $ip = $item.Substring($item.IndexOf('fixed-address'))
+            $ip2 = $ip.Substring(0,$ip.IndexOf(';'))
+            $ip3 = $ip2.Substring(14)
+            $host_entry.IPAddress = $ip3
 
+            $mac = $item.Substring($item.IndexOf('ethernet'))
+            $mac = $mac.Substring(9, $mac.IndexOf(';'))
+            $mac2 = $mac.Substring(0,$mac.IndexOf(';'))
+            $host_entry.clientid = $mac2
 
-            $item
+            $name = $item.Substring($item.IndexOf('host'))
+            $name2 = $name.Substring(5)
+            $name3 = $name2.Substring(0,$name2.IndexOf(' '))
+            $host_entry.Description = $name3
 
-            $test.Substring($test.IndexOf('ethernet'))
-             #$dhcp += $host_entry
+            
+
+            $dhcp += $host_entry
          }   
         }
     }
