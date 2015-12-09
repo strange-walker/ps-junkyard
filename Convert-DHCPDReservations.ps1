@@ -50,6 +50,8 @@ function Convert-DHCPDReservations
 
 
             $item
+
+            $test.Substring($test.IndexOf('ethernet'))
              #$dhcp += $host_entry
          }   
         }
