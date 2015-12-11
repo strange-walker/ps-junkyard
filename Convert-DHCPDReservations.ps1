@@ -90,6 +90,7 @@ function Convert-DHCPDReservations
             $mac = $item.Substring($item.IndexOf('ethernet'))
             $mac = $mac.Substring(9, $mac.IndexOf(';'))
             $mac2 = $mac.Substring(0,$mac.IndexOf(';'))
+            $mac2 = $mac2 -replace (':', '-')
             $host_entry.clientid = $mac2
 
             $name = $item.Substring($item.IndexOf('host'))
@@ -110,5 +111,8 @@ function Convert-DHCPDReservations
 }
 
 
-Convert-DHCPDReservations -File D:\scripts\dhcpd.conf
+# Convert-DHCPDReservations -File D:\scripts\dhcpd.conf
 
+
+$test = Convert-DHCPDReservations -File D:\scripts\dhcpd.conf
+$test2 = Select-Object ($_.ipaddress -match '192.168.1')
