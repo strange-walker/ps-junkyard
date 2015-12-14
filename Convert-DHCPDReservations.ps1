@@ -96,7 +96,8 @@ function Convert-DHCPDReservations
             $name = $item.Substring($item.IndexOf('host'))
             $name2 = $name.Substring(5)
             $name3 = $name2.Substring(0,$name2.IndexOf(' '))
-            $host_entry.Description = $name3
+            $name4 = $name3.Substring(0,$name3.IndexOf("`t"))
+            $host_entry.Description = $name4
 
             
 
@@ -115,4 +116,13 @@ function Convert-DHCPDReservations
 
 
 $test = Convert-DHCPDReservations -File D:\scripts\dhcpd.conf
-$test2 = Select-Object ($_.ipaddress -match '192.168.1')
+foreach ($item in $test)
+{
+if ($item.ipaddress -match '192.168.1.')
+{
+$item.ipaddress
+Add-DhcpServerv4Reservation -ClientId $item.ClientId -IPAddress $item.IPAddress -ScopeId 192.168.1.0 -ComputerName dc1 -Name $item.Description    
+}
+    
+}
+
