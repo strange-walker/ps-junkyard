@@ -1,6 +1,9 @@
 ﻿# папка для модулей
 %mydocuments%/WindowsPowerShell/Modules/%modulename%/%modulename%.psm1
 
+#ip address validate regex
+"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b"
+
 # создать шаблон функции
 ctrl+J
 
