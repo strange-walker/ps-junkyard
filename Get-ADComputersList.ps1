@@ -30,10 +30,13 @@ function Get-ADComputersList
     switch ($Scope)
         {
         "All"          {$filter = '*'}
-        "Desktops"     {$filter = '*'}
-        "Notebooks"    {$filter = '*'}
+        "Desktops"     {$filter = "*"}
+        "Notebooks"    {$filter = "*"}
         "Servers"      {$filter = "OperatingSystem -like '*Server*'"}
-        "Workstations" {$filter = '*'}
+        "Workstations" {$filter = "OperatingSystem -like '* XP *' -or 
+                                   OperatingSystem -like '* 7 *' -or 
+                                   OperatingSystem -like '* 8.1 *' -or
+                                   OperatingSystem -like '* 10 *'"}
         Default        {}
         }
     }
@@ -50,12 +53,6 @@ function Get-ADComputersList
 
 
 #single pc object
-$test = Get-ADComputer  -Properties * -Filter {LastLogonDate -gt $cutoffdate -and Name -eq ''}
-$test
 
-# Workstations
-(Get-ADComputer  -Properties $SpecialProperties -Filter {OperatingSystem -like '* XP *' -or 
-                                                         OperatingSystem -like '* 7 *' -or 
-                                                         OperatingSystem -like '* 8.1 *' -or
-                                                         OperatingSystem -like '* 10 *'
-                                                         } ).operatingsystem
+$full = Get-ADComputer  -Properties * -Filter {Name -eq 'algernon'}
+$full
