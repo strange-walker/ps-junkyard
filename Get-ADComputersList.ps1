@@ -17,11 +17,10 @@ function Get-ADComputersList
     (
         # Param1 help description
         [Parameter(Mandatory=$true)]
-        [validateset("All", "Desktops", "Notebooks", "Servers", "Workstations")]$Scope,
+        [validateset("All", "Servers", "Workstations")]$Scope,
 
-        # Param2 help description
-        [switch]
-        $Active
+        # Specifies
+        [int][ValidateRange(1,60)] $Active = $null
     )
 
     Begin
@@ -29,25 +28,28 @@ function Get-ADComputersList
     $SpecialProperties = @('LastLogonDate', 'OperatingSystem', 'Name')
     switch ($Scope)
         {
-        "All"          {$filter = '*'}
-        "Desktops"     {$filter = "*"}
-        "Notebooks"    {$filter = "*"}
-        "Servers"      {$filter = "OperatingSystem -like '*Server*'"}
-        "Workstations" {$filter = "OperatingSystem -like '* XP *' -or 
-                                   OperatingSystem -like '* 7 *' -or 
-                                   OperatingSystem -like '* 8.1 *' -or
-                                   OperatingSystem -like '* 10 *'"}
-        Default        {}
+        "All"              {$filter = "*"}
+        "Workstations"     {$filter = "OperatingSystem -like '* XP *' -or 
+                                       OperatingSystem -like '* 7 *' -or 
+                                       OperatingSystem -like '* 8.1 *' -or
+                                       OperatingSystem -like '* 10 *'"}
+        "Servers"          {$filter = "OperatingSystem -like '*Server*'"}
+        Default            {Throw "If you're seeing this, something has gone terribly wrong. Run, you fool." }
         }
+    $result = Get-ADComputer  -Properties $SpecialProperties -Filter $filter
+
+    if ($Active -ne 0)
+    {
+        $result = $result | Where-Object -Property LastLogonDate -gt (get-date).adddays(-$Active)
+    }
     }
     Process
     {
-    #$filter
-    $test = Get-ADComputer  -Properties $SpecialProperties -Filter $filter
+   
     }
     End
     {
-    $test
+    $result
     }
 }
 
@@ -55,4 +57,4 @@ function Get-ADComputersList
 #single pc object
 
 $full = Get-ADComputer  -Properties * -Filter {Name -eq 'algernon'}
-$full
+#$full
