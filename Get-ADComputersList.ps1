@@ -2,7 +2,7 @@
 .Synopsis
    Custom-filtered Get-ADComputer
 .DESCRIPTION
-   Long description
+   Bulds array of computer objects from Active Directory. Filters are based on OS edition.
 .EXAMPLE
    Example of how to use this cmdlet
 .EXAMPLE
