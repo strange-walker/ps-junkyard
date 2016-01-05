@@ -16,10 +16,8 @@ function Test-DiskFlooding
     Param
     (
         # Param1 help description
-        [Parameter(Mandatory=$true,
-                   ValueFromPipelineByPropertyName=$true,
-                   Position=0)]
-        $Scope='localhost',
+        [Parameter(Mandatory=$True,ValueFromPipeline=$True,ValueFromPipelinebyPropertyName=$True)]
+        $ComputerName='localhost',
 
         # Param2 help description
         [int]
@@ -29,31 +27,24 @@ function Test-DiskFlooding
     Begin
     {
     $alerts = @()
-    if ($Scope -eq 'domain') 
-            {
-            $Scope = (Get-ADComputer -Filter *).name
-            } 
     }
     Process
     {
-    foreach ($item in $scope)
-        {
-        $item
-        $storage = Get-DiskSpace -ComputerName $item
+        $storage = Get-DiskSpace -ComputerName $ComputerName
         foreach ($x in $storage)
             {
             switch ($x)
                 {
-                {$_.Capacity -in 1..20} {if ($_.Freespace -lt 5) { $alerts += ("$item Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
-                {$_.Capacity -in 21..80} {if ($_.Freespace -lt 10) { $alerts += ("$item Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
-                {$_.Capacity -in 81..200} {if ($_.Freespace -lt 20) { $alerts += ("$item Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
-                {$_.Capacity -in 201..500} {if ($_.Freespace -lt 30) { $alerts += ("$item Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
-                {$_.Capacity -in 501..1000} {if ($_.Freespace -lt 50) { $alerts += ("$item Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
-                {$_.Capacity -gt 1000} {if ($_.Freespace -lt 100) { $alerts += ("$item Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
+                {$_.Capacity -in 1..20} {if ($_.Freespace -lt 5) { $alerts += ("$ComputerName Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
+                {$_.Capacity -in 21..80} {if ($_.Freespace -lt 10) { $alerts += ("$ComputerName Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
+                {$_.Capacity -in 81..200} {if ($_.Freespace -lt 20) { $alerts += ("$ComputerName Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
+                {$_.Capacity -in 201..500} {if ($_.Freespace -lt 30) { $alerts += ("$ComputerName Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
+                {$_.Capacity -in 501..1000} {if ($_.Freespace -lt 50) { $alerts += ("$ComputerName Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
+                {$_.Capacity -gt 1000} {if ($_.Freespace -lt 100) { $alerts += ("$ComputerName Disk " +$_.name + " running low. " + $_.Freespace + " GB out of " + $_.Capacity + " left.")}}
                 Default {Write-Host 'oops'}
                 }
             }
-        }
+        
 
     }
     End
