@@ -1,17 +1,34 @@
 ﻿<#
 .Synopsis
-   Краткое описание
+   Returns info on local security group
 .DESCRIPTION
-   Длинное описание
+   Based on group name, returns its SID and members
 .EXAMPLE
-   Пример использования этого командлета
+
+PS C:\WINDOWS\system32> Get-LocalGroupMembers -GroupName Admins
+
+GroupName   : Admins
+GroupStatus : NotFound
+SID         : 
+Domain      : 
+Members     : 
+
 .EXAMPLE
-   Еще один пример использования этого командлета
+
+PS C:\WINDOWS\system32> Get-LocalGroupMembers -GroupName Administrators
+
+
+GroupName   : Administrators
+GroupStatus : Found
+SID         : S-1-5-32-544
+Domain      : DEMO
+Members     : {DEMO\Administrator, DEMO\strage}
+
 #>
 function Get-LocalGroupMembers {
     [CmdletBinding()]
     Param (
-        # Справочное описание параметра 1
+        # Names of groups to be queried.
         [Parameter(Mandatory=$true,
                    ValueFromPipelineByPropertyName=$true,
                    Position=0)]
@@ -23,18 +40,22 @@ function Get-LocalGroupMembers {
         foreach ($item in $GroupName) {
             try {
                 $wmi = Get-WmiObject -Class win32_group -Filter "name='$item'" -ErrorAction Stop
+                $members = $wmi.GetRelated() | where {($_.Caption -ne $null) -and ($_.sid -ne $null)}
                 $currentGroup = [ordered]@{
                     GroupName = $item
+                    GroupStatus = 'Found'
                     SID = $wmi.sid
                     Domain = $wmi.domain
-                    MemberUsers = ''
-                    MemberGroups = ''
+                    Members = $members.caption
                     }
                 }
             catch {
                 $currentGroup = [ordered]@{
                     GroupName = $item
-                    SID = "Group Not Found"
+                    GroupStatus = 'NotFound'
+                    SID = $null
+                    Domain = $null
+                    Members = $null
                     }
             
                 }
@@ -46,20 +67,3 @@ function Get-LocalGroupMembers {
     End {
         }
     }
-
-
-Get-LocalGroupMembers -GroupName Администраторы
-Get-LocalGroupMembers -GroupName Администрато
-
-
-<#
-$name = 'Администраторы'
-$t1 = Get-WmiObject -Class win32_group -Filter "name='$name'"
-
-foreach ($item in $t2)
-{
-    Write-Host "============================"
-    $item | gm
-}
-
-#>
